@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade de Horários</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --muted: #888888;
+    --header-bg: #f5f5f5;
+    --slot-M: #fafafa;
+    --slot-T: #f5f7ff;
+    --radius: 6px;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Painel de importacao */
+  .import-panel {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    background: #f9f9f9;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .import-panel label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .import-panel textarea {
+    width: 100%;
+    height: 130px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.65rem 0.75rem;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.6;
+  }
+
+  .import-panel textarea:focus { border-color: #aaaaaa; }
+
+  .import-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-gerar {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: #1a1a1a;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-gerar:hover { background: #333; }
+
+  .import-hint {
+    font-size: 0.72rem;
+    color: #bbbbbb;
+    font-family: var(--font-mono);
+  }
+
+  .import-error {
+    font-size: 0.72rem;
+    color: #e53e3e;
+    font-family: var(--font-mono);
+    margin-top: 0.5rem;
+    min-height: 1rem;
+  }
+
+  /* Grade */
+  .grade-wrapper { overflow-x: auto; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 700px;
+    table-layout: fixed;
+  }
+
+  thead th {
+    background: var(--header-bg);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+
+  thead th:first-child { color: transparent; }
+
+  td.slot-label {
+    background: var(--header-bg);
+    text-align: right;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .slot-code {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--muted);
+    display: block;
+  }
+
+  .slot-time {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: #bbbbbb;
+    display: block;
+    margin-top: 2px;
+  }
+
+  td.day-cell {
+    border: 1px solid var(--border);
+    padding: 0;
+    vertical-align: top;
+    height: 64px;
+  }
+
+  td.day-cell.turno-M { background: var(--slot-M); }
+  td.day-cell.turno-T { background: var(--slot-T); }
+
+  .cell-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .materia-chip {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.2rem 0.3rem;
+    transition: filter 0.15s;
+    cursor: default;
+    position: relative;
+  }
+
+  .materia-chip + .materia-chip {
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .materia-chip:hover { filter: brightness(1.1); }
+
+  .materia-chip[data-nome]:hover::after {
+    content: attr(data-nome);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    border: 1px solid #333;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  tr.turno-sep td {
+    height: 8px;
+    background: #e0e0e0;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Grade de Horários</h1>
+
+<div class="grade-wrapper">
+  <table id="grade"></table>
+</div>
+
+<div class="import-panel">
+  <label>Importar matérias &mdash; formato: nome - horario - sigla - #cor_fonte - #cor_fundo</label>
+  <textarea id="import-input" placeholder="desenho - 6T1234 - DES - #ffffff - #3a86ff
+projeto de analise de algoritmos - 25T56 - PAA - #ffffff - #ff006e"></textarea>
+  <div class="import-row">
+    <button class="btn-gerar" onclick="importar()">Gerar grade</button>
+    <span class="import-hint">uma matéria por linha &bull; campos separados por " - "</span>
+  </div>
+  <div class="import-error" id="import-error"></div>
+</div>
+
+<script>
+const DIAS = [
+  { num: "2", label: "Seg" },
+  { num: "3", label: "Ter" },
+  { num: "4", label: "Qua" },
+  { num: "5", label: "Qui" },
+  { num: "6", label: "Sex" },
+  { num: "7", label: "Sab" },
+];
+
+const SLOTS = [
+  { id: "M12", label: "M12", inicio: "07:30", fim: "09:10", turno: "M" },
+  { id: "M34", label: "M34", inicio: "09:20", fim: "11:00", turno: "M" },
+  { id: "M56", label: "M56", inicio: "11:10", fim: "13:00", turno: "M" },
+  { id: "T12", label: "T12", inicio: "13:30", fim: "15:10", turno: "T" },
+  { id: "T34", label: "T34", inicio: "15:20", fim: "17:00", turno: "T" },
+  { id: "T56", label: "T56", inicio: "17:10", fim: "19:00", turno: "T" },
+];
+
+let materias = [
+  { nome: "Desenho", sigla: "DES", horario: "6T1234", cor: "#ffffff", fundo: "#3a86ff" },
+];
+
+function importar() {
+  const raw = document.getElementById("import-input").value.trim();
+  const errEl = document.getElementById("import-error");
+  errEl.textContent = "";
+
+  if (!raw) { errEl.textContent = "Cole ao menos uma materia."; return; }
+
+  const linhas = raw.split("\n").map(l => l.trim()).filter(Boolean);
+  const resultado = [];
+  const erros = [];
+
+  for (let i = 0; i < linhas.length; i++) {
+    const partes = linhas[i].split(" - ").map(p => p.trim());
+    if (partes.length !== 5) {
+      erros.push(`Linha ${i + 1}: esperado 5 campos, encontrado ${partes.length}.`);
+      continue;
+    }
+    const [nome, horario, sigla, cor, fundo] = partes;
+    const hexRe = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+    if (!hexRe.test(cor))   { erros.push(`Linha ${i + 1}: cor de fonte invalida "${cor}".`); continue; }
+    if (!hexRe.test(fundo)) { erros.push(`Linha ${i + 1}: cor de fundo invalida "${fundo}".`); continue; }
+    resultado.push({ nome, horario, sigla, cor, fundo });
+  }
+
+  if (erros.length) { errEl.textContent = erros.join(" | "); return; }
+
+  materias = resultado;
+  renderGrade();
+}
+
+function parseHorario(str) {
+  const results = [];
+  const regex = /([2-7]+)([MT])(\d+)/g;
+  let m;
+  while ((m = regex.exec(str)) !== null) {
+    const dias = m[1].split("");
+    const turno = m[2];
+    const slotNums = m[3].match(/../g) || [];
+    for (const dia of dias)
+      for (const pair of slotNums)
+        results.push({ dia, slot: turno + pair });
+  }
+  return results;
+}
+
+function buildMap() {
+  const map = {};
+  for (const mat of materias) {
+    for (const { dia, slot } of parseHorario(mat.horario)) {
+      const key = `${dia}-${slot}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(mat);
+    }
+  }
+  return map;
+}
+
+function renderGrade() {
+  const map = buildMap();
+  const table = document.getElementById("grade");
+  table.innerHTML = "";
+
+  const thead = document.createElement("thead");
+  const trHead = document.createElement("tr");
+  trHead.appendChild(document.createElement("th"));
+  for (const dia of DIAS) {
+    const th = document.createElement("th");
+    th.textContent = dia.label;
+    trHead.appendChild(th);
+  }
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  let lastTurno = null;
+
+  for (const slot of SLOTS) {
+    if (lastTurno && lastTurno !== slot.turno) {
+      const sepTr = document.createElement("tr");
+      sepTr.classList.add("turno-sep");
+      for (let i = 0; i <= DIAS.length; i++) sepTr.appendChild(document.createElement("td"));
+      tbody.appendChild(sepTr);
+    }
+    lastTurno = slot.turno;
+
+    const tr = document.createElement("tr");
+    const tdLabel = document.createElement("td");
+    tdLabel.classList.add("slot-label");
+    tdLabel.innerHTML = `<span class="slot-code">${slot.label}</span><span class="slot-time">${slot.inicio} - ${slot.fim}</span>`;
+    tr.appendChild(tdLabel);
+
+    for (const dia of DIAS) {
+      const key = `${dia.num}-${slot.id}`;
+      const td = document.createElement("td");
+      td.classList.add("day-cell", `turno-${slot.turno}`);
+      const mats = map[key] || [];
+      if (mats.length > 0) {
+        const inner = document.createElement("div");
+        inner.classList.add("cell-inner");
+        for (const mat of mats) {
+          const chip = document.createElement("div");
+          chip.classList.add("materia-chip");
+          chip.style.background = mat.fundo;
+          chip.style.color = mat.cor;
+          chip.dataset.nome = mat.nome;
+          chip.textContent = mat.sigla;
+          inner.appendChild(chip);
+        }
+        td.appendChild(inner);
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(tbody);
+}
+
+renderGrade();
+</script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quem não te segue de volta · X</title>
+<style>
+  :root {
+    --bg: #EBEEF2;
+    --panel: #FBFCFD;
+    --ink: #14181F;
+    --muted: #5B6573;
+    --line: #D6DCE3;
+    --line-strong: #C2CAD3;
+    --miss: #D62F36;
+    --miss-bg: #FCEEEE;
+    --ok: #1E8E5A;
+    --accent: #2B5CE6;
+    --code-bg: #11151C;
+    --code-ink: #D9E2EC;
+    --radius: 10px;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  header { margin-bottom: 24px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0; max-width: 64ch; font-size: 15px; }
+
+  details.guide { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 24px; }
+  details.guide > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; font-size: 14px; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.guide > summary::-webkit-details-marker { display: none; }
+  details.guide > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
+  details.guide[open] > summary::before { transform: rotate(90deg); }
+  .guide-body { padding: 0 16px 16px; }
+  ol.steps { margin: 0 0 14px; padding-left: 20px; font-size: 14px; color: var(--ink); }
+  ol.steps li { margin-bottom: 6px; }
+  ol.steps code { background: #E7EBEF; padding: 1px 6px; border-radius: 5px; font-family: var(--mono); font-size: 12.5px; }
+  .codeblock { position: relative; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 14px 14px 14px; font-family: var(--mono); font-size: 12px; overflow-x: auto; line-height: 1.45; }
+  .codeblock pre { margin: 0; white-space: pre; }
+  .copycode { position: absolute; top: 10px; right: 10px; font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 5px 10px; border: 1px solid #2C3645; border-radius: 6px; background: #1B2230; color: var(--code-ink); cursor: pointer; }
+  .copycode:hover { background: #232C3D; }
+
+  .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .inputs { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .card h2 { font-size: 14px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+  .card .hint { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); font-weight: 600; }
+  .tag.set { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  textarea { width: 100%; min-height: 140px; resize: vertical; font-family: var(--mono); font-size: 12.5px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+  textarea:focus, .filebtn:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .row { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .filebtn { font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: #fff; cursor: pointer; color: var(--ink); }
+  .filebtn:hover { border-color: var(--ink); }
+  .filename { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  input[type=file] { display: none; }
+
+  .actions { margin: 24px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .go { font-family: var(--sans); font-size: 15px; font-weight: 700; padding: 12px 22px; border: none; border-radius: 9px; background: var(--ink); color: #fff; cursor: pointer; }
+  .go:hover { background: #000; }
+  .ghost { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); font-weight: 600; font-size: 13px; padding: 11px 16px; border-radius: 9px; cursor: pointer; }
+  .ghost:hover { border-color: var(--ink); color: var(--ink); }
+  .msg { font-family: var(--mono); font-size: 13px; color: var(--miss); min-height: 18px; }
+
+  .results { margin-top: 8px; }
+  .summary { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .stat .n { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; font-family: var(--mono); }
+  .stat .n.miss { color: var(--miss); }
+  .stat .n.ok { color: var(--ok); }
+  .stat .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 180px; font-family: var(--mono); font-size: 13px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+
+  ul.list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
+  ul.list li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-left: 3px solid var(--miss); background: var(--miss-bg); border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 14px; }
+  ul.list li:last-child { border-bottom: none; }
+  ul.list li .minus { color: var(--miss); font-weight: 700; user-select: none; }
+  ul.list li a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  ul.list li a:hover { text-decoration: underline; }
+  ul.list li .nm { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+  ul.list li .idx { margin-left: auto; color: var(--muted); font-size: 12px; }
+
+  .empty { padding: 28px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: 14px; }
+  .hidden { display: none; }
+  footer { margin-top: 40px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .copied { color: var(--ok); }
+  code { font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">following − followers · X</p>
+    <h1>Quem não te segue de volta</h1>
+    <p class="sub">Vale pro X (Twitter). O export oficial do X só entrega número de conta, sem nome, então o jeito mais prático de ter @username de verdade é capturar a lista pelo console. Abra o passo a passo abaixo, gere os dois JSON e jogue aqui.</p>
+  </header>
+
+  <details class="guide">
+    <summary>Como pegar as listas (1 minuto)</summary>
+    <div class="guide-body">
+      <ol class="steps">
+        <li>Abra <code>x.com/SEU_USUARIO/following</code> e pressione <code>F12</code> → aba <code>Console</code>.</li>
+        <li>Cole o script abaixo e dê Enter.</li>
+        <li>Role a lista até o fim (a captura acontece sozinha conforme carrega).</li>
+        <li>Rode <code>baixarLista()</code> (ou <code>copiarLista()</code> se o download não abrir). Salve como <strong>following</strong>.</li>
+        <li>Vá em <code>x.com/SEU_USUARIO/followers</code>, dê <code>F5</code>, cole o script de novo, role até o fim e rode <code>baixarLista()</code>. Salve como <strong>followers</strong>.</li>
+        <li>Suba os dois aqui embaixo e clique em Comparar.</li>
+      </ol>
+      <div class="codeblock">
+        <button class="copycode" id="copyscript">Copiar</button>
+<pre id="script">(() => {
+  const u = new Map();
+  const seen = new Set();
+  let last = -1;
+  const log = () => { if (u.size !== last) { last = u.size; console.log("Capturados: " + u.size); } };
+  const walk = (o) => {
+    if (!o || typeof o !== "object") return;
+    if (Array.isArray(o)) return o.forEach(walk);
+    const lg = (o.legacy && typeof o.legacy === "object") ? o.legacy : o;
+    const sn = lg.screen_name || o.screen_name;
+    if (sn && typeof sn === "string") u.set(sn.toLowerCase(), { username: sn, name: lg.name || "" });
+    for (const k in o) walk(o[k]);
+  };
+  const handle = (url, text) => {
+    if (!url) return;
+    if (/graphql/.test(url)) seen.add(url.split("?")[0]);
+    if (!/Following|Followers/.test(url)) return;
+    try { walk(JSON.parse(text)); log(); } catch (e) {}
+  };
+  const of = window.fetch;
+  window.fetch = async (...a) => {
+    const r = await of(...a);
+    try { const url = typeof a[0] === "string" ? a[0] : (a[0] && a[0].url); r.clone().text().then(t => handle(url, t)).catch(() => {}); } catch (e) {}
+    return r;
+  };
+  const oo = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (m, url) {
+    this.__u = url;
+    this.addEventListener("load", function () { try { handle(this.__u, this.responseText); } catch (e) {} });
+    return oo.apply(this, arguments);
+  };
+  window.baixarLista = () => {
+    const arr = [...u.values()];
+    try { const b = new Blob([JSON.stringify(arr, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "x-lista.json"; a.click(); } catch (e) {}
+    console.log("Total: " + arr.length + ". Se o download nao abrir, rode copiarLista()");
+    return arr.length;
+  };
+  window.copiarLista = () => { navigator.clipboard.writeText(JSON.stringify([...u.values()], null, 2)).then(() => console.log("Copiado " + u.size + " perfis. Cole no campo do app.")); };
+  window.__urls = () => console.log([...seen].join("\n") || "nenhuma chamada graphql vista ainda");
+  console.log("OK (fetch + XHR). Role a lista ate o fim; o contador vai subir. Depois rode baixarLista() ou copiarLista().");
+})();</pre>
+      </div>
+    </div>
+  </details>
+
+  <div class="inputs">
+    <div class="card">
+      <h2>Following <span class="tag" id="tag-following">vazio</span></h2>
+      <p class="hint">Quem você segue.</p>
+      <textarea id="following" placeholder='[ { "username": "...", "name": "..." }, ... ]  ou  window.YTD.following.part0 = [ ... ]' spellcheck="false"></textarea>
+      <div class="row">
+        <label class="filebtn" for="file-following">Escolher arquivo</label>
+        <input type="file" id="file-following" accept=".json,.js,application/json">
+        <span class="filename" id="name-following"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Followers <span class="tag" id="tag-followers">vazio</span></h2>
+      <p class="hint">Quem te segue.</p>
+      <textarea id="followers" placeholder='[ { "username": "...", "name": "..." }, ... ]  ou  window.YTD.follower.part0 = [ ... ]' spellcheck="false"></textarea>
+      <div class="row">
+        <label class="filebtn" for="file-followers">Escolher arquivo</label>
+        <input type="file" id="file-followers" accept=".json,.js,application/json">
+        <span class="filename" id="name-followers"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="go" id="run">Comparar</button>
+    <button class="ghost" id="clear">Limpar tudo</button>
+    <span class="msg" id="msg"></span>
+  </div>
+
+  <section class="results hidden" id="results">
+    <div class="summary">
+      <div class="stat"><div class="n" id="s-following">0</div><div class="l">você segue</div></div>
+      <div class="stat"><div class="n" id="s-followers">0</div><div class="l">te seguem</div></div>
+      <div class="stat"><div class="n ok" id="s-mutual">0</div><div class="l">mútuos</div></div>
+      <div class="stat"><div class="n miss" id="s-miss">0</div><div class="l">não te seguem</div></div>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="search" placeholder="filtrar por @username ou nome" spellcheck="false">
+      <button class="ghost" id="copy">Copiar lista</button>
+    </div>
+    <ul class="list" id="list"></ul>
+    <div class="empty hidden" id="noresult">nenhum perfil corresponde ao filtro</div>
+  </section>
+
+  <footer>Tudo roda no seu navegador. O script só lê a sua própria lista de seguidos/seguidores; nada é enviado para fora.</footer>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let nonFollowers = [];
+
+  function extractUsers(raw) {
+    let text = raw.trim();
+    // remove o wrapper do export oficial do X: window.YTD.xxx.partN = [...]  ;
+    text = text.replace(/^\s*window\.YTD\.[A-Za-z0-9_]+\.part\d+\s*=\s*/, "").replace(/;\s*$/, "");
+    let data;
+    try { data = JSON.parse(text); }
+    catch (e) { throw new Error("JSON inválido"); }
+
+    const map = new Map();
+    const add = (key, user, name, href) => { if (!map.has(key)) map.set(key, { user, name: name || "", href }); };
+
+    function collect(node) {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) { node.forEach(collect); return; }
+
+      // perfil com handle (script de console ou GraphQL)
+      const lg = (node.legacy && typeof node.legacy === "object") ? node.legacy : node;
+      const handle = lg.screen_name || node.screen_name || node.username || node.handle;
+      if (handle && typeof handle === "string") {
+        add(handle.toLowerCase(), handle, lg.name || node.name || "", "https://x.com/" + handle);
+        return;
+      }
+      // export oficial: { following: { accountId, userLink } } / { follower: {...} }
+      const inner = node.following || node.follower;
+      if (inner && inner.accountId) {
+        add("id:" + inner.accountId, "id:" + inner.accountId, "", inner.userLink || ("https://twitter.com/intent/user?user_id=" + inner.accountId));
+        return;
+      }
+      if (node.accountId) {
+        add("id:" + node.accountId, "id:" + node.accountId, "", node.userLink || ("https://twitter.com/intent/user?user_id=" + node.accountId));
+        return;
+      }
+      for (const k in node) collect(node[k]);
+    }
+    collect(data);
+    if (map.size === 0) throw new Error("nenhum perfil encontrado");
+    return map;
+  }
+
+  function setTag(id, count) {
+    const t = $(id);
+    if (count > 0) { t.textContent = count + " contas"; t.classList.add("set"); }
+    else { t.textContent = "vazio"; t.classList.remove("set"); }
+  }
+
+  function loadFile(input, target, nameEl, tagEl) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      $(target).value = reader.result;
+      $(nameEl).textContent = file.name;
+      try { setTag(tagEl, extractUsers(reader.result).size); } catch { setTag(tagEl, 0); }
+    };
+    reader.readAsText(file);
+  }
+  $("file-following").addEventListener("change", (e) => loadFile(e.target, "following", "name-following", "tag-following"));
+  $("file-followers").addEventListener("change", (e) => loadFile(e.target, "followers", "name-followers", "tag-followers"));
+
+  function liveTag(target, tagEl) {
+    const v = $(target).value.trim();
+    if (!v) { setTag(tagEl, 0); return; }
+    try { setTag(tagEl, extractUsers(v).size); } catch { setTag(tagEl, 0); }
+  }
+  $("following").addEventListener("input", () => liveTag("following", "tag-following"));
+  $("followers").addEventListener("input", () => liveTag("followers", "tag-followers"));
+
+  function label(x) { return x.user.indexOf("id:") === 0 ? x.user : "@" + x.user; }
+
+  function render(filter = "") {
+    const list = $("list");
+    const f = filter.trim().toLowerCase();
+    const shown = nonFollowers.filter(x => (x.user + " " + x.name).toLowerCase().includes(f));
+    list.innerHTML = "";
+    shown.forEach((x, i) => {
+      const li = document.createElement("li");
+      const minus = document.createElement("span");
+      minus.className = "minus"; minus.textContent = "−";
+      const a = document.createElement("a");
+      a.href = x.href; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = label(x);
+      li.append(minus, a);
+      if (x.name) { const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = x.name; li.append(nm); }
+      const idx = document.createElement("span"); idx.className = "idx"; idx.textContent = (i + 1);
+      li.append(idx);
+      list.appendChild(li);
+    });
+    $("noresult").classList.toggle("hidden", shown.length > 0);
+    list.classList.toggle("hidden", shown.length === 0);
+  }
+
+  $("run").addEventListener("click", () => {
+    const msg = $("msg"); msg.textContent = "";
+    const fgVal = $("following").value.trim();
+    const frVal = $("followers").value.trim();
+    if (!fgVal || !frVal) { msg.textContent = "Preencha os dois campos antes de comparar."; return; }
+
+    let following, followers;
+    try { following = extractUsers(fgVal); } catch (e) { msg.textContent = "Following: " + e.message; return; }
+    try { followers = extractUsers(frVal); } catch (e) { msg.textContent = "Followers: " + e.message; return; }
+
+    nonFollowers = [];
+    for (const [key, val] of following) { if (!followers.has(key)) nonFollowers.push(val); }
+    nonFollowers.sort((a, b) => a.user.localeCompare(b.user));
+
+    const mutual = following.size - nonFollowers.length;
+    $("s-following").textContent = following.size;
+    $("s-followers").textContent = followers.size;
+    $("s-mutual").textContent = mutual;
+    $("s-miss").textContent = nonFollowers.length;
+
+    $("results").classList.remove("hidden");
+    $("search").value = "";
+    render();
+    $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("search").addEventListener("input", (e) => render(e.target.value));
+
+  function copyBtnFeedback(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const old = btn.textContent;
+      btn.textContent = "Copiado ✓"; btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
+    });
+  }
+  $("copy").addEventListener("click", () => copyBtnFeedback($("copy"), nonFollowers.map(label).join("\n")));
+  $("copyscript").addEventListener("click", () => copyBtnFeedback($("copyscript"), $("script").textContent));
+
+  $("clear").addEventListener("click", () => {
+    ["following", "followers"].forEach(id => $(id).value = "");
+    ["name-following", "name-followers"].forEach(id => $(id).textContent = "");
+    setTag("tag-following", 0); setTag("tag-followers", 0);
+    $("file-following").value = ""; $("file-followers").value = "";
+    nonFollowers = [];
+    $("results").classList.add("hidden");
+    $("msg").textContent = "";
+  });
+</script>
+</body>
+</html>
