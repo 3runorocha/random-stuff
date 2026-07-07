@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triagem de Artigos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F6F4EF;
+    --paper: #FFFFFF;
+    --ink: #201D19;
+    --ink-soft: #6B6459;
+    --line: #E1DCD1;
+    --accept: #2F6B4F;
+    --accept-bg: #E8F1EB;
+    --reject: #9B3B32;
+    --reject-bg: #F6E9E6;
+    --gray-cat: #4C6373;
+    --gray-bg: #E9EEF0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding: 40px 24px 80px;
+  }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; }
+
+  header{ margin-bottom: 40px; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 34px;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .sub{
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+
+  section.card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .inputs{
+    display:grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 760px){ .inputs{ grid-template-columns: 1fr; } }
+
+  label.field-label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  textarea{
+    width:100%;
+    resize: vertical;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #FCFBF9;
+    color: var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    padding: 12px 14px;
+    outline: none;
+  }
+  textarea:focus{ border-color:#B9AF9C; background:#fff; }
+  #entrada1{ min-height: 260px; }
+  #entrada2{ min-height: 260px; }
+
+  .actions{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+
+  button.primary{
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 12px 22px;
+    cursor:pointer;
+    transition: background .15s ease;
+  }
+  button.primary:hover{ background:#3A342C; }
+  button.primary:focus-visible{ outline: 2px solid #2F6B4F; outline-offset:2px; }
+
+  .hint{ font-size: 12.5px; color: var(--ink-soft); }
+
+  .divider{
+    display:flex; align-items:center; gap:10px;
+    margin: 34px 0 26px;
+    color: var(--ink-soft);
+  }
+  .divider::before, .divider::after{
+    content:""; flex:1; height:0; border-top: 1px dashed var(--line);
+  }
+  .divider span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing:.14em; text-transform:uppercase;
+  }
+
+  #warnings{ margin-bottom: 22px; }
+  .warn-box{
+    border: 1px solid #E3CDBA;
+    background: #FBF2E9;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #6B4B2A;
+  }
+  .warn-box strong{ display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+  .warn-box ul{ margin: 4px 0 0; padding-left: 18px; }
+
+  .outputs{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px){ .outputs{ grid-template-columns: 1fr; } }
+
+  .out-card{
+    position:relative;
+    border:1px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper);
+    padding: 22px 18px 18px;
+    overflow:hidden;
+  }
+
+  .stamp{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 2px solid currentColor;
+    border-radius: 6px;
+    padding: 5px 10px;
+    transform: rotate(-4deg);
+    margin-bottom: 14px;
+  }
+  .out-card.reject .stamp{ color: var(--reject); }
+  .out-card.accept .stamp{ color: var(--accept); }
+  .out-card.gray .stamp{ color: var(--gray-cat); }
+
+  .out-card.reject{ background: linear-gradient(180deg, var(--reject-bg) 0%, var(--paper) 90px); }
+  .out-card.accept{ background: linear-gradient(180deg, var(--accept-bg) 0%, var(--paper) 90px); }
+  .out-card.gray{ background: linear-gradient(180deg, var(--gray-bg) 0%, var(--paper) 90px); }
+
+  .out-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 4px;
+  }
+  .count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  pre.output{
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    background: #FCFBF9;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 12px 13px;
+    min-height: 140px;
+    max-height: 420px;
+    overflow:auto;
+    margin: 6px 0 12px;
+  }
+
+  button.copy{
+    font-family:'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 7px 12px;
+    cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  button.copy:hover{ border-color:#B9AF9C; background:#F3F0EA; }
+  button.copy.copied{ border-color: var(--accept); color: var(--accept); }
+
+  footer.tools{
+    display:flex; justify-content:flex-end; margin-top: 24px;
+  }
+  button.ghost{
+    font-family:'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: 7px;
+    padding: 9px 16px;
+    cursor:pointer;
+  }
+  button.ghost:hover{ color: var(--ink); border-color:#B9AF9C; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Triagem &middot; Revisao Sistematica</div>
+    <h1>Separador de Artigos</h1>
+    <div class="sub">Cole a lista numerada de artigos e a classificacao (aceitos, rejeitados, cinza). Numeros podem ser individuais (1, 2, 3) ou em intervalo (1-5), inclusive misturados (1-3, 5, 8-10).</div>
+  </header>
+
+  <section class="inputs">
+    <div>
+      <label class="field-label" for="entrada1">Entrada 1 &middot; Lista de artigos</label>
+      <textarea id="entrada1" placeholder="1. Titulo do artigo (2026)
+2. Outro titulo (2026)
+3. ...">1. Research on local structure optimization of ships based on multi-island genetic algorithm (2026)
+2. Multi-Objective Memetic Algorithm With Adaptive Weights for Inverse Antenna Design (2026)
+3. Landfill Site Allocation Multi-Objective Optimization With NSGA-II: A Case Study on Fogo Island, Cape Verde (2026)
+4. Walking Behavior-Based Positioning Strategy for Dockless Shared Mobility Systems (2026)
+5. Efficient Meta-Heuristic Approach for the Multiobjective Green p-Hub Centre Routing Problem (2026)
+6. Enhancing Scatter Search for the Linear Ordering Problem by Relaxation Adaptive Memory Programming (2026)</textarea>
+    </div>
+    <div>
+      <label class="field-label" for="entrada2">Entrada 2 &middot; Classificacao</label>
+      <textarea id="entrada2" placeholder="REJEITA: 1, 2
+ACEITA: 3-4
+CINZA: 5, 6">REJEITA: 1, 2
+ACEITA: 3, 4
+CINZA: 5, 6</textarea>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="primary" id="btnProcessar">Processar</button>
+    <span class="hint">Aceita rotulos REJEITA/REJEITADO, ACEITA/ACEITO e CINZA/CINZENTA, com ou sem acento.</span>
+  </div>
+
+  <div id="warnings"></div>
+
+  <div class="divider"><span>Resultado</span></div>
+
+  <section class="outputs">
+    <div class="out-card reject">
+      <span class="stamp">Rejeitados</span>
+      <div class="out-head"><span class="count" id="rejectCount">0 itens</span></div>
+      <pre class="output" id="rejectOutput">(nenhum item)</pre>
+      <button class="copy" data-target="rejectOutput">Copiar lista</button>
+    </div>
+    <div class="out-card accept">
+      <span class="stamp">Aceitos</span>
+      <div class="out-head"><span class="count" id="acceptCount">0 itens</span></div>
+      <pre class="output" id="acceptOutput">(nenhum item)</pre>
+      <button class="copy" data-target="acceptOutput">Copiar lista</button>
+    </div>
+    <div class="out-card gray">
+      <span class="stamp">Cinza</span>
+      <div class="out-head"><span class="count" id="grayCount">0 itens</span></div>
+      <pre class="output" id="grayOutput">(nenhum item)</pre>
+      <button class="copy" data-target="grayOutput">Copiar lista</button>
+    </div>
+  </section>
+
+  <footer class="tools">
+    <button class="ghost" id="btnBaixar">Baixar tudo (.txt)</button>
+  </footer>
+
+</div>
+
+<script>
+function parseEntrada1(text){
+  const map = new Map();
+  const lines = text.split(/\r?\n/);
+  for (const raw of lines){
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(/^(\d{1,6})\s*[.):]\s*(.+)$/);
+    if (m){
+      const num = parseInt(m[1], 10);
+      const rest = m[2].trim();
+      if (!map.has(num)) map.set(num, rest);
+    }
+  }
+  return map;
+}
+
+function parseNumberList(str){
+  const nums = new Set();
+  const tokens = str.split(',');
+  for (let tok of tokens){
+    tok = tok.trim();
+    if (!tok) continue;
+    const range = tok.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (range){
+      let a = parseInt(range[1], 10), b = parseInt(range[2], 10);
+      if (a > b){ const t = a; a = b; b = t; }
+      for (let i = a; i <= b; i++) nums.add(i);
+    } else {
+      const n = parseInt(tok, 10);
+      if (!isNaN(n)) nums.add(n);
+    }
+  }
+  return nums;
+}
+
+function parseEntrada2(text){
+  const result = { reject: new Set(), accept: new Set(), gray: new Set() };
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  for (const line of lines){
+    let category = null;
+    if (/reje/i.test(line)) category = 'reject';
+    else if (/aceit/i.test(line)) category = 'accept';
+    else if (/cinz/i.test(line)) category = 'gray';
+    if (!category) continue;
+
+    const colonIdx = line.indexOf(':');
+    const numsPart = colonIdx !== -1 ? line.slice(colonIdx + 1) : line.replace(/^[^\d]+/, '');
+    const nums = parseNumberList(numsPart);
+    nums.forEach(n => result[category].add(n));
+  }
+  return result;
+}
+
+function buildOutput(set, artigos){
+  const sorted = [...set].filter(n => artigos.has(n)).sort((a, b) => a - b);
+  const lines = sorted.map(n => `${n}. ${artigos.get(n)}`);
+  return { count: sorted.length, text: lines.join('\n') };
+}
+
+function renderWarnings(warnings){
+  const el = document.getElementById('warnings');
+  if (!warnings.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="warn-box"><strong>Atencao</strong><ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>`;
+}
+
+function processar(){
+  const artigos = parseEntrada1(document.getElementById('entrada1').value);
+  const cats = parseEntrada2(document.getElementById('entrada2').value);
+
+  const allNums = new Set([...cats.reject, ...cats.accept, ...cats.gray]);
+  const warnings = [];
+
+  const conflicts = [...allNums].filter(n => {
+    let c = 0;
+    if (cats.reject.has(n)) c++;
+    if (cats.accept.has(n)) c++;
+    if (cats.gray.has(n)) c++;
+    return c > 1;
+  }).sort((a, b) => a - b);
+  if (conflicts.length) warnings.push(`Numero(s) em mais de uma categoria: ${conflicts.join(', ')}`);
+
+  const invalid = [...allNums].filter(n => !artigos.has(n)).sort((a, b) => a - b);
+  if (invalid.length) warnings.push(`Numero(s) classificado(s) mas ausente(s) na lista de artigos: ${invalid.join(', ')}`);
+
+  const unclassified = [...artigos.keys()].filter(n => !allNums.has(n)).sort((a, b) => a - b);
+  if (unclassified.length) warnings.push(`Numero(s) da lista sem classificacao: ${unclassified.join(', ')}`);
+
+  renderWarnings(warnings);
+
+  const outR = buildOutput(cats.reject, artigos);
+  const outA = buildOutput(cats.accept, artigos);
+  const outG = buildOutput(cats.gray, artigos);
+
+  document.getElementById('rejectOutput').textContent = outR.text || '(nenhum item)';
+  document.getElementById('acceptOutput').textContent = outA.text || '(nenhum item)';
+  document.getElementById('grayOutput').textContent = outG.text || '(nenhum item)';
+
+  document.getElementById('rejectCount').textContent = `${outR.count} ${outR.count === 1 ? 'item' : 'itens'}`;
+  document.getElementById('acceptCount').textContent = `${outA.count} ${outA.count === 1 ? 'item' : 'itens'}`;
+  document.getElementById('grayCount').textContent = `${outG.count} ${outG.count === 1 ? 'item' : 'itens'}`;
+}
+
+document.getElementById('btnProcessar').addEventListener('click', processar);
+
+document.querySelectorAll('button.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const targetId = btn.getAttribute('data-target');
+    const text = document.getElementById(targetId).textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+    } catch (e) {
+      alert('Nao foi possivel copiar automaticamente. Selecione o texto manualmente.');
+    }
+  });
+});
+
+document.getElementById('btnBaixar').addEventListener('click', () => {
+  const r = document.getElementById('rejectOutput').textContent;
+  const a = document.getElementById('acceptOutput').textContent;
+  const g = document.getElementById('grayOutput').textContent;
+  const content = `REJEITADOS\n${'='.repeat(40)}\n${r}\n\nACEITOS\n${'='.repeat(40)}\n${a}\n\nCINZA\n${'='.repeat(40)}\n${g}\n`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'triagem-artigos.txt';
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+// Processa o exemplo ja preenchido ao carregar
+processar();
+</script>
+</body>
+</html>

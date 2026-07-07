@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extrator de títulos - Parsif.al</title>
+<style>
+  :root { --ink:#22221f; --muted:#6b6a64; --line:#d9d7cf; --bg:#faf9f5; --card:#ffffff; --accent:#0f6e56; --accent-soft:#e1f5ee; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  .wrap { max-width:860px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:20px; font-weight:600; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:14px; margin:0 0 20px; }
+  label.block { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+  textarea { width:100%; min-height:180px; padding:12px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; border:1px solid var(--line); border-radius:8px; background:var(--card); resize:vertical; }
+  textarea:focus { outline:2px solid var(--accent); outline-offset:1px; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:14px 0; }
+  .chk { display:flex; align-items:center; gap:6px; font-size:14px; }
+  button { border:none; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; }
+  .primary { background:var(--accent); color:#fff; }
+  .primary:active { transform:translateY(1px); }
+  .ghost { background:var(--accent-soft); color:var(--accent); }
+  .stats { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px; }
+  .pill { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:4px 12px; font-size:13px; }
+  .pill b { font-weight:600; }
+  .ok { border-color:var(--accent); color:var(--accent); }
+  .warn { color:#8a4b12; border-color:#e0b184; background:#fdf3e6; }
+  #out { min-height:240px; }
+  .hint { font-size:12px; color:var(--muted); margin-top:6px; }
+  .copied { background:#0a5040 !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Extrator de títulos do Parsif.al</h1>
+  <p class="sub">Cole abaixo o Ctrl+C da lista de estudos (Study Selection). A ferramenta extrai só os títulos, filtra por status e formata em blocos numerados pra colar no chat.</p>
+
+  <label class="block" for="in">1. Cole aqui a tabela copiada</label>
+  <textarea id="in" placeholder="Bibtex Key&#9;Title&#9;Author&#9;Journal&#9;Year&#9;Added by&#9;Added at&#9;Status&#10;&#9;Um título de artigo...&#9;Fulano&#9;Revista X&#9;2024&#9;...&#9;Unclassified"></textarea>
+
+  <div class="row">
+    <span class="chk"><input type="checkbox" id="onlyUnc" checked> <label for="onlyUnc">Só Unclassified (ignora já decididos e duplicados)</label></span>
+    <span class="chk"><input type="checkbox" id="withYear" checked> <label for="withYear">Incluir ano</label></span>
+  </div>
+
+  <div class="row">
+    <button class="primary" id="go">Extrair títulos</button>
+    <button class="ghost" id="copy">Copiar resultado</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <label class="block" for="out">2. Resultado (blocos de 200, cole no chat)</label>
+  <textarea id="out" readonly placeholder="Os títulos aparecem aqui..."></textarea>
+  <p class="hint">Se um bloco ficar grande demais pra uma mensagem, cole um bloco por vez. Linhas que a ferramenta não conseguiu interpretar aparecem no fim, marcadas com [?], pra você conferir manualmente.</p>
+</div>
+
+<script>
+const YEAR_RE = /^(19|20)\d{2}$/;
+const BLOCK = 200;
+
+function parseLine(raw) {
+  const line = raw.replace(/\r/g, "");
+  if (!line.trim()) return null;
+  if (/bibtex\s*key/i.test(line) && /title/i.test(line)) return null;
+
+  const cells = line.split("\t").map(c => c.trim());
+  if (cells.length < 3) {
+    const t = line.trim();
+    return (t.split(/\s+/).length >= 4) ? { title: t, year: "", status: "", fuzzy: true } : null;
+  }
+
+  let yearIdx = -1;
+  for (let i = cells.length - 1; i >= 0; i--) {
+    if (YEAR_RE.test(cells[i])) { yearIdx = i; break; }
+  }
+
+  let status = "";
+  for (let i = cells.length - 1; i >= 0; i--) {
+    if (cells[i]) { status = cells[i]; break; }
+  }
+  if (YEAR_RE.test(status) || /\d{2}\s\w{3}\s\d{4}/.test(status)) status = "";
+
+  const before = (yearIdx > 0 ? cells.slice(0, yearIdx) : cells.slice(0, cells.length - 1)).filter(c => c);
+  if (!before.length) return null;
+
+  let title = before[0];
+  if (before.length > 1 && !/\s/.test(title)) title = before[1];
+
+  if (!title || title.split(/\s+/).length < 2) return { title: line.trim(), year: "", status, fuzzy: true };
+
+  return { title, year: yearIdx >= 0 ? cells[yearIdx] : "", status, fuzzy: false };
+}
+
+function run() {
+  const txt = document.getElementById("in").value;
+  const onlyUnc = document.getElementById("onlyUnc").checked;
+  const withYear = document.getElementById("withYear").checked;
+
+  const seen = new Set();
+  const items = [], fuzzy = [];
+  const counts = {};
+
+  for (const raw of txt.split("\n")) {
+    const p = parseLine(raw);
+    if (!p) continue;
+    const st = p.status || "(sem status)";
+    counts[st] = (counts[st] || 0) + 1;
+
+    if (onlyUnc && p.status && !/unclassified/i.test(p.status)) continue;
+
+    const key = p.title.toLowerCase().replace(/\s+/g, " ");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    if (p.fuzzy) fuzzy.push(p); else items.push(p);
+  }
+
+  const lines = [];
+  items.forEach((p, i) => {
+    if (i % BLOCK === 0) {
+      const b = Math.floor(i / BLOCK) + 1;
+      const total = Math.ceil(items.length / BLOCK);
+      lines.push((i ? "\n" : "") + "===== BLOCO " + b + " de " + total + " =====");
+    }
+    lines.push((i + 1) + ". " + p.title + (withYear && p.year ? " (" + p.year + ")" : ""));
+  });
+
+  if (fuzzy.length) {
+    lines.push("\n===== LINHAS NAO INTERPRETADAS (conferir) =====");
+    fuzzy.forEach(p => lines.push("[?] " + p.title));
+  }
+
+  document.getElementById("out").value = lines.join("\n");
+
+  const stats = document.getElementById("stats");
+  stats.innerHTML = "";
+  const mk = (html, cls) => { const s = document.createElement("span"); s.className = "pill " + (cls || ""); s.innerHTML = html; stats.appendChild(s); };
+  mk("<b>" + items.length + "</b> títulos extraídos", "ok");
+  Object.keys(counts).sort().forEach(k => mk(k + ": <b>" + counts[k] + "</b>"));
+  if (fuzzy.length) mk("<b>" + fuzzy.length + "</b> linhas não interpretadas", "warn");
+}
+
+document.getElementById("go").addEventListener("click", run);
+document.getElementById("in").addEventListener("paste", () => setTimeout(run, 50));
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const out = document.getElementById("out");
+  if (!out.value) return;
+  try { await navigator.clipboard.writeText(out.value); }
+  catch { out.select(); document.execCommand("copy"); }
+  const btn = document.getElementById("copy");
+  const old = btn.textContent;
+  btn.textContent = "Copiado!";
+  btn.classList.add("copied");
+  setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
+});
+</script>
+</body>
+</html>
