@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro narrado · CertChain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1e1e1c;
+    --paper: #ffffff;
+    --bg: #eaeef2;
+    --blue: #0089c7;
+    --blue-strong: #0075ab;
+    --blue-soft: rgba(0,137,199,.10);
+    --red: #e30613;
+    --muted: #6b6e73;
+    --line: #dfe3e8;
+    --paper-line: #e7ebef;
+
+    --font-head: 'Space Grotesk', system-ui, sans-serif;
+    --font-read: 'Lora', Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --fala-size: 1.12rem;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-read);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  .masthead {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+    padding: 1.6rem 1.75rem; box-shadow: 0 1px 2px rgba(20,20,20,.04), 0 14px 40px rgba(20,20,20,.05);
+    margin-bottom: 1.5rem;
+  }
+  .masthead__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: .7rem; }
+  .brand__mark { width: 38px; height: 38px; color: var(--blue); flex-shrink: 0; }
+  .brand__title { font-family: var(--font-head); font-weight: 700; font-size: 1.5rem; letter-spacing: -.01em; line-height: 1.1; }
+  .brand__sub { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+  .timebadge {
+    font-family: var(--font-mono); font-size: .8rem; font-weight: 600; color: var(--blue-strong);
+    background: var(--blue-soft); border: 1px solid rgba(0,137,199,.22);
+    padding: .5rem .8rem; border-radius: 10px; white-space: nowrap;
+  }
+  .howto { margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--paper-line); font-size: .96rem; }
+  .legend { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: .9rem; font-size: .88rem; }
+  .legend span { display: inline-flex; align-items: center; gap: .5rem; color: var(--muted); }
+  .swatch { width: 26px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+  .swatch--tela { background: var(--blue-soft); border: 1px solid var(--blue); }
+  .swatch--fala { background: #fff; border: 1px solid var(--line); font-family: var(--font-read); text-align:center; font-size:11px; line-height:14px; }
+
+  .prep { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem 1.6rem; margin-bottom: 2.25rem; }
+  .prep h2 { font-family: var(--font-head); font-size: 1.05rem; margin-bottom: .2rem; }
+  .prep p.note { font-size: .85rem; color: var(--muted); margin-bottom: 1rem; }
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+  .checklist li { display: flex; gap: .65rem; align-items: flex-start; font-size: .95rem; }
+  .checklist input { margin-top: .4rem; width: 16px; height: 16px; accent-color: var(--blue); flex-shrink: 0; cursor: pointer; }
+  .checklist code { font-family: var(--font-mono); font-size: .84em; background: var(--blue-soft); color: var(--blue-strong); padding: .05rem .35rem; border-radius: 5px; }
+
+  .timeline { position: relative; padding-left: 2.4rem; }
+  .timeline::before { content: ""; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--blue), rgba(0,137,199,.25)); }
+
+  .scene { position: relative; margin-bottom: 1.5rem; }
+  .scene::before { content: ""; position: absolute; left: -2.4rem; top: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); border: 3px solid var(--blue); box-shadow: 0 0 0 4px var(--bg); }
+  .scene__card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem 1.6rem 1.5rem; box-shadow: 0 1px 2px rgba(20,20,20,.03), 0 10px 30px rgba(20,20,20,.045); }
+
+  .scene__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .scene__title { font-family: var(--font-head); font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; }
+  .scene__time { font-family: var(--font-mono); font-size: .82rem; font-weight: 600; color: var(--muted); }
+  .scene__num { font-family: var(--font-mono); font-size: .72rem; color: var(--blue); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: .15rem; }
+
+  .tela { display: flex; gap: .7rem; align-items: flex-start; background: var(--blue-soft); border: 1px solid rgba(0,137,199,.28); border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1.3rem; }
+  .tela__icon { color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+  .tela__icon svg { width: 18px; height: 18px; display: block; }
+  .tela__label { font-family: var(--font-mono); font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-strong); }
+  .tela__text { font-family: var(--font-head); font-size: .95rem; font-weight: 500; color: var(--ink); margin-top: .1rem; }
+
+  .fala__label { font-family: var(--font-mono); font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .7rem; }
+  .fala { font-size: var(--fala-size); }
+  .fala p { margin-bottom: .95rem; }
+  .fala p:last-child { margin-bottom: 0; }
+
+  .just { border-left: 3px solid var(--blue); background: var(--blue-soft); padding: .7rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+  .just .why { font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--blue-strong); display: block; margin-bottom: .3rem; }
+  .just p { margin-bottom: 0; }
+
+  ol.steps { list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 1.1rem; font-size: var(--fala-size); }
+  ol.steps > li { position: relative; padding-left: 2.2rem; counter-increment: step; }
+  ol.steps > li::before { content: counter(step); position: absolute; left: 0; top: .1em; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--blue); color: #fff; font-family: var(--font-mono); font-weight: 600; font-size: .82rem; display: grid; place-items: center; }
+  .act { display: inline-block; font-family: var(--font-mono); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--blue-strong); background: var(--blue-soft); border: 1px solid rgba(0,137,199,.25); padding: .12rem .45rem; border-radius: 5px; margin-bottom: .45rem; }
+
+  code.cmd { font-family: var(--font-mono); font-size: .82em; background: #1e1e1c; color: #eaeae4; padding: .15rem .5rem; border-radius: 6px; }
+  .addr { font-family: var(--font-mono); font-size: .82em; color: var(--blue-strong); word-break: break-all; }
+
+  .tips { margin-top: 2rem; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem 1.6rem; }
+  .tips h2 { font-family: var(--font-head); font-size: 1.05rem; margin-bottom: .8rem; }
+  .tips ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; font-size: .95rem; }
+  .tips li { position: relative; padding-left: 1.4rem; }
+  .tips li::before { content: "▹"; position: absolute; left: 0; color: var(--blue); }
+
+  .sizer { position: fixed; top: 1rem; right: 1rem; display: flex; gap: .3rem; z-index: 10; }
+  .sizer button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: var(--font-head); font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(20,20,20,.08); }
+  .sizer button:hover { background: var(--blue-soft); border-color: var(--blue); }
+
+  @media (max-width: 560px) {
+    body { padding: 1.5rem .9rem 3rem; }
+    .masthead, .prep, .scene__card, .tips { padding-left: 1.1rem; padding-right: 1.1rem; }
+    .timeline { padding-left: 1.9rem; }
+    .scene::before { left: -1.9rem; }
+    .sizer { display: none; }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .sizer { display: none; }
+    .masthead, .prep, .scene__card, .tips { box-shadow: none; }
+    .scene { break-inside: avoid; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sizer" aria-hidden="true">
+  <button onclick="fala(-1)" title="Diminuir texto">A&minus;</button>
+  <button onclick="fala(1)" title="Aumentar texto">A+</button>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead__top">
+      <div class="brand">
+        <svg class="brand__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 4 5v6c0 5 3.4 8.3 8 11 4.6-2.7 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/>
+        </svg>
+        <div>
+          <div class="brand__title">Roteiro narrado</div>
+          <div class="brand__sub">CertChain · Certificação · UFAL</div>
+        </div>
+      </div>
+      <div class="timebadge">alvo ~10 min · faixa 7 a 15</div>
+    </div>
+    <div class="howto">
+      O texto em serifada é a <strong>narração por extenso</strong>: dá pra ler em voz alta na sua passada de áudio. O box azul de cada cena diz <strong>o que mostrar na tela</strong>, pra sua passada de imagem. Os trechos com a marca azul à esquerda são as <strong>justificativas técnicas</strong>: não pule, é o que o professor quer ouvir.
+      <div class="legend">
+        <span><span class="swatch swatch--tela"></span> box azul = imagem</span>
+        <span><span class="swatch swatch--fala">a</span> serifada = narração</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="prep">
+    <h2>Antes de gravar</h2>
+    <p class="note">Deixe tudo pronto antes do rec. Nada disso aparece no vídeo.</p>
+    <ul class="checklist">
+      <li><input type="checkbox"><span>Os 3 terminais rodando: <code>hardhat node</code>, deploy feito, frontend no ar.</span></li>
+      <li><input type="checkbox"><span>MetaMask na rede Hardhat Local, conta dona (Account #0), dados de atividade limpos.</span></li>
+      <li><input type="checkbox"><span>1 certificado já emitido para a Account #2 como backup, caso algo falhe.</span></li>
+      <li><input type="checkbox"><span>Janelas prontas: a aplicação, o VS Code com <code>CertChain.sol</code> e o terminal.</span></li>
+      <li><input type="checkbox"><span>Notificações e abas pessoais fechadas. Zoom do navegador em 110% a 125%.</span></li>
+    </ul>
+  </section>
+
+  <div class="timeline">
+
+    <!-- BLOCO 1 -->
+    <section class="scene">
+      <div class="scene__card">
+        <div class="scene__head">
+          <div><span class="scene__num">Bloco 1</span><span class="scene__title">O problema e a proposta</span></div>
+          <span class="scene__time">0:00 a 1:30</span>
+        </div>
+        <div class="tela">
+          <span class="tela__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+          <div><div class="tela__label">Na tela</div><div class="tela__text">A aplicação aberta, parada, sem interagir ainda.</div></div>
+        </div>
+        <div class="fala__label">Fala</div>
+        <div class="fala">
+          <p>Olá! Nesse vídeo eu vou apresentar o CertChain, um projeto que desenvolvi para a disciplina de Blockchain e Web3. A ideia dele parte de um problema bem concreto: hoje, quando alguém precisa confirmar se um certificado ou diploma acadêmico é verdadeiro, essa pessoa depende inteiramente da instituição que emitiu. Ela tem que entrar em contato com a faculdade, esperar uma resposta, e confiar que aquele documento não foi adulterado. É um processo lento, burocrático e que abre espaço para fraude.</p>
+          <p>O que eu proponho aqui é tirar essa dependência do meio. O CertChain é uma aplicação descentralizada onde a instituição registra os certificados diretamente na blockchain, e a partir daí qualquer pessoa consegue verificar a autenticidade por conta própria, só com o endereço da carteira do aluno, sem precisar falar com ninguém.</p>
+          <div class="just">
+            <span class="why">Por que blockchain</span>
+            <p>E por que usar blockchain para isso? Porque ela me dá três coisas que resolvem exatamente esse problema: o registro é imutável, então ninguém altera um certificado depois de emitido; é público, então qualquer um pode conferir; e não depende de um servidor central. Mesmo que a instituição saísse do ar amanhã, os certificados continuariam lá, verificáveis por qualquer pessoa.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOCO 2 -->
+    <section class="scene">
+      <div class="scene__card">
+        <div class="scene__head">
+          <div><span class="scene__num">Bloco 2</span><span class="scene__title">Arquitetura e stack</span></div>
+          <span class="scene__time">1:30 a 3:00</span>
+        </div>
+        <div class="tela">
+          <span class="tela__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>
+          <div><div class="tela__label">Na tela</div><div class="tela__text">VS Code com a árvore de pastas do projeto visível.</div></div>
+        </div>
+        <div class="fala__label">Fala</div>
+        <div class="fala">
+          <p>Antes de mostrar funcionando, deixa eu explicar rapidamente como o projeto está montado. Ele tem três camadas. A primeira é o contrato inteligente, escrito em Solidity: é ele que guarda os certificados e as regras, é a fonte da verdade do sistema. A segunda é o frontend, feito em React com a biblioteca ethers.js, que é a interface que a gente vê. E a terceira é o MetaMask, a carteira, que funciona como a ponte entre a interface e a blockchain, assinando as transações.</p>
+          <div class="just">
+            <span class="why">Por que Hardhat</span>
+            <p>Sobre as escolhas de ferramenta: eu usei o Hardhat para desenvolver o contrato. Escolhi ele porque tem um ecossistema maduro, já vem com um framework de testes integrado e, principalmente, tem uma blockchain local embutida, o que me deixou desenvolver e testar tudo sem gastar nada.</p>
+          </div>
+          <div class="just">
+            <span class="why">Por que rede local</span>
+            <p>E aqui vale uma observação importante: esse vídeo mostra o projeto rodando numa blockchain local, na minha própria máquina. Mas não é uma simulação simplificada, é a mesma máquina virtual da Ethereum, com transações de verdade, só que num ambiente local e sem custo. Se eu quisesse publicar numa rede pública, como a testnet Sepolia, o código seria exatamente o mesmo. A única coisa que mudaria seria a configuração da rede.</p>
+          </div>
+          <p>Uma última decisão dessa parte: eu optei por guardar os dados do certificado dentro do próprio contrato, sem usar armazenamento externo. Foi uma escolha consciente para manter o escopo enxuto, e no final do vídeo eu comento o custo dessa escolha.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOCO 3 -->
+    <section class="scene">
+      <div class="scene__card">
+        <div class="scene__head">
+          <div><span class="scene__num">Bloco 3</span><span class="scene__title">O contrato, parte a parte</span></div>
+          <span class="scene__time">3:00 a 6:00</span>
+        </div>
+        <div class="tela">
+          <span class="tela__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg></span>
+          <div><div class="tela__label">Na tela</div><div class="tela__text">O arquivo CertChain.sol no VS Code. Role devagar conforme fala.</div></div>
+        </div>
+        <div class="fala__label">Fala</div>
+        <div class="fala">
+          <p>Agora o coração do projeto, que é o contrato. Vou passar por ele de cima para baixo. Ele começa com essa struct, a Certificate. Ela é o molde de um certificado: guarda o nome do aluno, o curso, a data, e um campo que diz se aquele certificado foi revogado ou não.</p>
+          <div class="just">
+            <span class="why">Por que a busca é pela carteira</span>
+            <p>Logo abaixo vem a decisão mais importante de todo o projeto, essa linha aqui: um mapping que liga um endereço de carteira a uma lista de certificados. Deixa eu explicar por que ela é assim. A chave é o endereço da carteira do aluno, e o valor é a lista de certificados dele. É por isso que, na hora de verificar, a gente busca pelo endereço da carteira: o endereço funciona como a identidade daquela pessoa, e a partir dele eu recupero de uma vez todos os certificados que pertencem a ela.</p>
+          </div>
+          <div class="just">
+            <span class="why">Por que uma lista, e não um só</span>
+            <p>E por que uma lista, em vez de um certificado só? Porque na primeira versão eu tinha feito um por carteira, mas percebi que isso não fazia sentido: um certificado não é necessariamente uma graduação, pode ser uma disciplina, um curso de extensão, e um mesmo aluno pode ter vários. Então essa versão final aceita quantos forem necessários por carteira. Eu faço questão de mostrar isso porque foi uma decisão de design que evoluiu durante o projeto.</p>
+          </div>
+          <div class="just">
+            <span class="why">Por que o onlyOwner</span>
+            <p>Esse modifier aqui, o onlyOwner, é o controle de acesso. Ele garante que só a carteira que publicou o contrato, que representa a instituição, consegue emitir ou revogar. É o que impede qualquer pessoa de sair emitindo certificado falso. E repara que a segurança aqui não é uma senha num banco de dados: ela vem da chave privada da instituição, que só ela tem.</p>
+          </div>
+          <p>A função issue é a de emissão. Ela valida o endereço, adiciona o certificado na lista, e no final dispara esse evento, o CertificateIssued. Os eventos são importantes porque ficam registrados de forma indexada na blockchain, então dá para auditar todo o histórico de emissões olhando de fora do contrato.</p>
+          <div class="just">
+            <span class="why">Por que revogar em vez de apagar</span>
+            <p>A função revoke é a de revogação, e repara que ela recebe o índice do certificado, que é consequência direta daquela decisão da lista: como uma carteira tem vários, eu preciso dizer qual deles revogar. E tem um detalhe conceitual importante: eu não apago o certificado, eu marco ele como revogado. Isso é proposital, porque numa blockchain você não apaga histórico. A revogação não é uma exclusão, é um fato novo que fica registrado, e isso mantém tudo auditável.</p>
+          </div>
+          <p>E por último a getCertificates, que é a função de consulta. Ela é uma função view, ou seja, é só leitura: não altera nada e não custa gas. É exatamente ela que o portal público de verificação usa para trazer todos os certificados de uma carteira.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOCO 5 -->
+    <section class="scene">
+      <div class="scene__card">
+        <div class="scene__head">
+          <div><span class="scene__num">Bloco 4</span><span class="scene__title">Demo ao vivo</span></div>
+          <span class="scene__time">6:00 a 8:30</span>
+        </div>
+        <div class="tela">
+          <span class="tela__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 8 6 4-6 4V8z"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg></span>
+          <div><div class="tela__label">Na tela</div><div class="tela__text">A aplicação e o MetaMask. Fala e ação andam juntas.</div></div>
+        </div>
+        <div class="fala__label">Fala (por passo)</div>
+        <ol class="steps">
+          <li>
+            <span class="act">Conectar</span>
+            <p>Conecto a carteira aqui em Conectar MetaMask e confirmo. Repara no selo Emissor: a aplicação viu que essa carteira é a dona do contrato, por isso mostra as abas Emitir e Revogar. Qualquer outra carteira só veria a de Verificar.</p>
+          </li>
+          <li>
+            <span class="act">Emitir 2 na mesma carteira</span>
+            <p>Vou emitir dois certificados para a mesma carteira. Esse primeiro, de Cálculo I. Ao confirmar no MetaMask, isso é uma transação assinada com a chave da instituição que altera o contrato, e por isso custa gas. E agora um segundo, na mesma carteira, de Blockchain e Web3.</p>
+          </li>
+          <li>
+            <span class="act">Verificar</span>
+            <p>Agora a verificação. Colo o endereço da carteira e aparecem os dois certificados, os dois vinculados ao mesmo endereço. É a decisão do contrato na prática: eu busco pela carteira e recebo todos os certificados dela. E é uma consulta pública, só leitura, sem assinar nada e sem custo.</p>
+          </li>
+          <li>
+            <span class="act">Revogar e re-verificar</span>
+            <p>Por fim, a revogação. Na aba Revogar eu busco essa mesma carteira e revogo o de Cálculo I. Verificando de novo: o de Cálculo I fica com o carimbo de revogado e o outro segue válido. A revogação é por certificado, não pela carteira inteira, e fica registrada para sempre.</p>
+          </li>
+          <li>
+            <span class="act">Extra rápido</span>
+            <p>E dois detalhes: aqui em cima alterno o tema claro e escuro, e um endereço sem certificado mostra o aviso de que nada foi encontrado.</p>
+          </li>
+        </ol>
+        <p style="margin-top:1.1rem;font-size:.85rem;color:var(--muted)">Account #1: <span class="addr">0x70997970C51812dc3A010C7d01b50e0d17dc79C8</span></p>
+      </div>
+    </section>
+
+    <!-- BLOCO 6 -->
+    <section class="scene">
+      <div class="scene__card">
+        <div class="scene__head">
+          <div><span class="scene__num">Bloco 5</span><span class="scene__title">Limitações e fechamento</span></div>
+          <span class="scene__time">8:30 a 10:00</span>
+        </div>
+        <div class="tela">
+          <span class="tela__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+          <div><div class="tela__label">Na tela</div><div class="tela__text">Livre: pode voltar para a aplicação ou para o código.</div></div>
+        </div>
+        <div class="fala__label">Fala</div>
+        <div class="fala">
+          <p>Para fechar, quero ser honesto sobre as limitações, porque isso faz parte de entender o projeto.</p>
+          <p>A primeira: eu guardo o nome do aluno em texto puro dentro da blockchain. Como tudo numa rede pública fica visível para sempre, isso seria uma questão de privacidade num cenário real, inclusive por causa da LGPD. A evolução natural seria guardar só um hash do certificado na blockchain e manter os dados pessoais fora dela.</p>
+          <p>A segunda: eu rodei tudo numa rede local. Num cenário de produção seria uma testnet ou a rede principal, mas, como eu falei, a única mudança seria a configuração da rede. O código continua o mesmo.</p>
+          <p>E a terceira: hoje existe uma instituição só, que é o dono do contrato. Um próximo passo seria ter um controle de acesso com várias instituições autorizadas a emitir.</p>
+          <p>Fechando: esse projeto passa pelo ciclo completo de uma aplicação descentralizada. Tem o contrato com controle de acesso e eventos, tem os testes, o deploy, e o frontend conversando com a blockchain. E no fim ele resolve um problema real, que é conseguir verificar a autenticidade de um certificado sem depender de ninguém. Era isso, obrigado.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="tips">
+    <h2>Na hora de gravar</h2>
+    <ul>
+      <li>Grave a imagem seguindo os boxes azuis; depois narre por cima lendo o texto em serifada.</li>
+      <li>Não leia totalmente travado: use o texto como base e deixe soar natural, como se estivesse explicando para alguém.</li>
+      <li>Os blocos 3 e 4 são os mais longos; se o vídeo estourar 15 min, corte um pouco das justificativas do bloco 3, nunca a demo.</li>
+      <li>Confira o áudio nos primeiros 30 segundos antes de narrar tudo.</li>
+      <li>Botões A+ e A− no canto aumentam o texto, caso você leia de longe da tela.</li>
+    </ul>
+  </section>
+
+</div>
+
+<script>
+  (function () {
+    var sizes = [1.0, 1.12, 1.24, 1.36];
+    var i = 1;
+    window.fala = function (dir) {
+      i = Math.max(0, Math.min(sizes.length - 1, i + dir));
+      document.documentElement.style.setProperty('--fala-size', sizes[i] + 'rem');
+    };
+  })();
+</script>
+
+</body>
+</html>
